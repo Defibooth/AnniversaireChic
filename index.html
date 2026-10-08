@@ -426,8 +426,9 @@
 
     chargerPioche();
 
-    // Nombre maximum de défis par session, puis message QR code
-    const MAX_DEFIS = 5;
+    // Nombre de défis illimité. Pour remettre une limite (ex. 5 défis puis message QR code),
+    // remplacer Infinity par le nombre voulu.
+    const MAX_DEFIS = Infinity;
     const MESSAGE_FIN = "Flash le QR code pour continuer";
     // Le compteur est mémorisé sur le téléphone : recharger la page ne le remet pas à zéro.
     // Seul le lien du QR code (adresse de la page + ?qr=1) débloque 5 nouveaux défis.
