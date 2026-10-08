@@ -429,7 +429,28 @@
     // Nombre maximum de défis par session, puis message QR code
     const MAX_DEFIS = 5;
     const MESSAGE_FIN = "Flash le QR code pour continuer";
+    // Le compteur est mémorisé sur le téléphone : recharger la page ne le remet pas à zéro.
+    // Seul le lien du QR code (adresse de la page + ?qr=1) débloque 5 nouveaux défis.
+    const CLE_COMPTEUR = 'defis-anniv-compteur-v1';
     let tires = 0;
+    try { tires = parseInt(localStorage.getItem(CLE_COMPTEUR), 10) || 0; } catch (e) {}
+
+    function sauverCompteur() {
+      try { localStorage.setItem(CLE_COMPTEUR, String(tires)); } catch (e) {}
+    }
+
+    (function () {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('qr')) {
+          tires = 0;
+          sauverCompteur();
+          // On retire « ?qr=1 » de l'adresse pour qu'un simple rechargement ne débloque pas à nouveau
+          url.searchParams.delete('qr');
+          history.replaceState(null, '', url.pathname + url.search + url.hash);
+        }
+      } catch (e) {}
+    })();
 
     const card = document.getElementById('card');
     const btn = document.getElementById('actionBtn');
@@ -471,6 +492,7 @@
         // Le vrai défi est pioché dans la pioche mélangée
         card.textContent = piocherDefi();
         tires++;
+        sauverCompteur();
         btn.textContent = "Recommencer";
         btn.classList.remove('running');
         card.classList.add('stopped');
@@ -493,6 +515,16 @@
         intervalId = setInterval(defilement, 60);
       }
     }
+
+    function afficherLimite() {
+      card.textContent = MESSAGE_FIN;
+      card.classList.remove('stopped', 'placeholder');
+      card.classList.add('limit');
+      btn.disabled = true;
+    }
+
+    // Limite déjà atteinte (page rechargée) : on bloque tout de suite
+    if (tires >= MAX_DEFIS) afficherLimite();
   </script>
 
 </body>
